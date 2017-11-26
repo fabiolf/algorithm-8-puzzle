@@ -16,9 +16,14 @@ public class Solver {
         private final int mManhattan;
         private final Node mPredecessor;
         
-        public Node(Board board, int moves, Node predecessor) {
+//        public Node(Board board, int moves, Node predecessor) {
+        public Node(Board board, Node predecessor) {
             mBoard = board;
-            mMoves = moves;
+            if (predecessor == null)
+                mMoves = 0;
+            else
+                mMoves = predecessor.getMoves() + 1;
+//            mMoves = moves;
             mManhattan = board.manhattan();
             mPredecessor = predecessor;
             mPriority = mManhattan + mMoves;
@@ -28,10 +33,10 @@ public class Solver {
             return mPriority;
         }
         
-        public int getManhattan() {
-            return mManhattan;
-        }
-        
+//        public int getManhattan() {
+//            return mManhattan;
+//        }
+//        
         public int getMoves() {
             return mMoves;
         }
@@ -53,28 +58,47 @@ public class Solver {
             return 0;
         }
         
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("priority  = ").append(mPriority).append("\n");
+            sb.append("moves     = ").append(mMoves).append("\n");
+            sb.append("manhattan = ").append(mManhattan).append("\n");
+            sb.append(mBoard.toString());
+            return sb.toString();
+        }
+        
     }
     
     public Solver(Board initial) {
         // find a solution to the initial board (using the A* algorithm)
         if (initial == null)
             throw new java.lang.IllegalArgumentException("null argument received");
+        
         boolean solvable = false;
         boolean solvableTwin = false;
-        int moves = 0;
-        int movesTwin = 0;
+        
+//        int moves = 0;
+//        int movesTwin = 0;
         // create required infrastructure
         MinPQ<Node> pq = new MinPQ<Node>();
         MinPQ<Node> pqTwin = new MinPQ<Node>();
         
         // first step - insert the initial board with 0 moves and null predecessor
-        pq.insert(new Node(initial, moves, null));
-        pqTwin.insert(new Node(initial.twin(), movesTwin, null));
+//        pq.insert(new Node(initial, moves, null));
+//        pqTwin.insert(new Node(initial.twin(), movesTwin, null));
+        pq.insert(new Node(initial, null));
+        pqTwin.insert(new Node(initial.twin(), null));
         
         // second step - loop through the following steps:
         Node node;
         Node nodeTwin;
+//        int step = 0;
         do {
+            // DEBUG
+//            System.out.println("STEP " + step);
+//            for (Node n : pq)
+//                System.out.println(n.toString());
+//            step++;
             // - remove the node with minimum priority
             node = pq.delMin();
 //            System.out.println("Priority = ".concat(Integer.toString(node.getPriority())));
@@ -93,7 +117,7 @@ public class Solver {
                 }
             } else {
                 // - increment the number of moves
-                moves++;
+//                moves++;
                 // - calculate the neighbors
                 for (Board board : node.getBoard().neighbors()) {
                     // - insert the neighbors (as nodes) in the PQ
@@ -108,7 +132,7 @@ public class Solver {
 //                            break;
 //                        }
 //                    if (!found) 
-                    pq.insert(new Node(board, moves, node));
+                    pq.insert(new Node(board, node));
                 }
             }
             // - repeat until the dequeued move represents the goal board
@@ -119,18 +143,18 @@ public class Solver {
                 solvableTwin = true;
             else {
                 // - increment the number of moves
-                movesTwin++;
+//                movesTwin++;
                 // - calculate the neighbors
-                for (Board board : nodeTwin.getBoard().neighbors()) {
+                for (Board boardTwin : nodeTwin.getBoard().neighbors()) {
                     // - insert the neighbors (as nodes) in the PQ
                     if (nodeTwin.getPredecessor() != null)
-                        if (board.equals(nodeTwin.getPredecessor().getBoard()))
+                        if (boardTwin.equals(nodeTwin.getPredecessor().getBoard()))
                             continue;
-                    pqTwin.insert(new Node(board, movesTwin, nodeTwin));
+                    pqTwin.insert(new Node(boardTwin, nodeTwin));
                 }
             }
             // - repeat until the dequeued move represents the goal board
-        } while (!solvable && !solvableTwin && !pq.isEmpty());
+        } while (!solvable && !solvableTwin);
         mSolvable = solvable;
     }
 
@@ -141,7 +165,11 @@ public class Solver {
 
     public int moves() {
         // min number of moves to solve initial board; -1 if unsolvable
-        return mBoards.size() == 0 ? 0 : mBoards.size()-1;
+    	if (!mSolvable)
+    		return -1;
+    	if (mBoards != null)
+    		return mBoards.size() == 0 ? 0 : mBoards.size()-1;
+    	return 0;
     }
 
     public Iterable<Board> solution() {

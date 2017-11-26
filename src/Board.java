@@ -144,16 +144,16 @@ public final class Board {
             auxBlocks[iBlank-1][jBlank] = 0;
             neighbors.enqueue(new Board(auxBlocks));
         }
-        if (iBlank < mBlocks.length-1) { // then we can swap it to its lower neighbor (and then return the tile back to its original place)
-            int[][] auxBlocks = copy(mBlocks);
-            auxBlocks[iBlank][jBlank] = auxBlocks[iBlank+1][jBlank];
-            auxBlocks[iBlank+1][jBlank] = 0;
-            neighbors.enqueue(new Board(auxBlocks));
-        }
         if (jBlank > 0) { // then we can swap it to its left neighbor (and then return the tile back to its original place)
             int[][] auxBlocks = copy(mBlocks);
             auxBlocks[iBlank][jBlank] = auxBlocks[iBlank][jBlank-1];
             auxBlocks[iBlank][jBlank-1] = 0;
+            neighbors.enqueue(new Board(auxBlocks));
+        }
+        if (iBlank < mBlocks.length-1) { // then we can swap it to its lower neighbor (and then return the tile back to its original place)
+            int[][] auxBlocks = copy(mBlocks);
+            auxBlocks[iBlank][jBlank] = auxBlocks[iBlank+1][jBlank];
+            auxBlocks[iBlank+1][jBlank] = 0;
             neighbors.enqueue(new Board(auxBlocks));
         }
         if (jBlank < mBlocks.length-1) { // then we can swap it to its right neighbor (and then return the tile back to its original place)
